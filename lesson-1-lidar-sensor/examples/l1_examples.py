@@ -72,6 +72,8 @@ def range_image_to_point_cloud(frame, lidar_name, vis=True):
     y = np.sin(azimuth_tiled) * np.cos(inclination_tiled) * ri_range
     z = np.sin(inclination_tiled) * ri_range
 
+    print(az_correction)
+
     # transform 3d points into vehicle coordinate system
     xyz_sensor = np.stack([x,y,z,np.ones_like(z)])
     xyz_vehicle = np.einsum('ij,jkl->ikl', extrinsic, xyz_sensor)
@@ -80,13 +82,13 @@ def range_image_to_point_cloud(frame, lidar_name, vis=True):
     # extract points with range > 0
     idx_range = ri_range > 0
     pcl = xyz_vehicle[idx_range,:3]
- 
+  
     # visualize point-cloud
     if vis:
         pcd = o3d.geometry.PointCloud()
         pcd.points = o3d.utility.Vector3dVector(pcl)
         o3d.visualization.draw_geometries([pcd])
-
+    
     # stack lidar point intensity as last column
     pcl_full = np.column_stack((pcl, ri[idx_range, 1]))    
 
@@ -122,8 +124,10 @@ def get_max_min_range(frame, lidar_name):
 
     # extract range image from frame
     ri = load_range_image(frame, lidar_name)
+    # set all elements with the entry -1 to 0.0
     ri[ri<0]=0.0
 
+    # check the first column of the data in ri
     print('max. range = ' + str(round(np.amax(ri[:,:,0]),2)) + 'm')
     print('min. range = ' + str(round(np.amin(ri[:,:,0]),2)) + 'm')
 
