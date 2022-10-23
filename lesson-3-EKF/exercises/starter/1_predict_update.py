@@ -25,6 +25,9 @@ class Filter:
         ############
         # TODO: implement prediction step
         ############
+        F = self.F()
+        x = F * x
+        P = F * P * F.transpose() + self.Q()
         
         return x, P
 
@@ -34,6 +37,13 @@ class Filter:
         ############
         # TODO: implement update step
         ############
+        H = self.H()
+        gamma = z - H * x
+        S = H * P * H.transpose() + R
+        K = P * H.transpose() * np.linalg.inv(S) # linalg.inv(S) : Inverse of matrix S
+        x = x + K * gamma
+        I = np.identity(self.dim_state)
+        P = (I - K * H) * P
         
         return x, P     
         

@@ -1,4 +1,5 @@
 # imports
+from pydoc import visiblename
 import numpy as np
 import matplotlib
 matplotlib.use('wxagg') # change backend so that figure maximizing works on Mac as well   
@@ -28,8 +29,19 @@ class Camera:
         # TODO: Return True if x lies in sensor's field of view, otherwise return False. 
         # Don't forget to transform from vehicle to sensor coordinates.
         ############
+        # veh to sens
+        pos_veh = np.ones((4, 1))
+        pos_veh[0:3] = x[0:3]
+        pos_sens = self.veh_to_sens * pos_veh
+        visible = False
+
+        if pos_sens[0] > 0:
+            alpha = np.arctan(pos_sens[1] / pos_sens[0])
+            if alpha > self.fov[0] and alpha < self.fov[1]:
+                visible = True
+
             
-        return False
+        return visible
         
 #################
 def run():

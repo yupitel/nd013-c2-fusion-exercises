@@ -16,7 +16,29 @@ class Track:
         ############
         # TODO: initialize self.x and self.P from measurement z and R, don't forget coordinate transforms
         ############
-        
+
+        # pos_sens and veh
+        pos_sens = np.ones((4, 1))
+        pos_sens[0:3] = meas.z[0:3]
+        pos_veh = meas.sens_to_veh * pos_sens
+
+        self.x = np.zeros((6, 1))
+        self.x[0:3] = pos_veh[0:3]
+
+        M_rot = meas.sens_to_veh[0:3, 0:3]
+        P_pos = M_rot * meas.R * np.transpose(M_rot)
+         
+        sigma_p44 = 50
+        sigma_p55 = 50
+        sigma_p66 = 5
+        P_vel = np.matrix([[sigma_p44 ** 2, 0, 0],
+        [0, sigma_p55 ** 2, 0],
+        [0, 0, sigma_p66 ** 2]
+        ])
+
+        self.P = np.zeros((6, 6))
+        self.P[0:3, 0:3] = P_pos
+        self.P[3:6, 3:6] = P_vel
         
 ###################  
         
